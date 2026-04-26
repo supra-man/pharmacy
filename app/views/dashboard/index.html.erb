@@ -1,0 +1,92 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="w-full space-y-8">
+  <% if notice.present? %>
+    <p id="notice" class="inline-block rounded-md bg-green-50 px-3 py-2 text-sm font-medium text-green-700"><%= notice %></p>
+  <% end %>
+
+  <section class="flex flex-col gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Pharmacy Shop</p>
+      <h1 class="mt-2 text-3xl font-bold text-slate-900">Prescription Delivery Dashboard</h1>
+      <p class="mt-2 max-w-2xl text-sm text-slate-600">Track upcoming prescription deliveries and quickly see which customers need attention first.</p>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <%= link_to "Customers", customers_path, class: "rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700" %>
+      <%= link_to "Add Customer", new_customer_path, class: "rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50" %>
+      <%= link_to "Add Prescription", new_prescription_path, class: "rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50" %>
+    </div>
+  </section>
+
+  <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 px-6 py-4">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">Upcoming Deliveries</h2>
+          <p class="mt-1 text-sm text-slate-500">Search by customer or medicine. Deliveries stay sorted by the nearest due date first.</p>
+        </div>
+
+        <%= form_with url: dashboard_path, method: :get, local: true, class: "flex w-full flex-col gap-3 sm:flex-row lg:max-w-2xl" do |form| %>
+          <div class="flex-1">
+            <%= form.label :query, "Search", class: "mb-1 block text-sm font-medium text-slate-700" %>
+            <%= form.search_field :query,
+                                  value: @query,
+                                  placeholder: "Type a customer name, phone, medicine, or notes",
+                                  oninput: "this.form.requestSubmit()",
+                                  class: "block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200" %>
+          </div>
+
+          <div class="flex items-end gap-2 self-end sm:self-auto">
+            <% if @query.present? %>
+              <%= link_to "Reset", dashboard_path, class: "rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @upcoming_prescriptions.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Medicine</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Next Delivery</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 bg-white">
+            <% @upcoming_prescriptions.each do |prescription| %>
+              <tr class="hover:bg-slate-50">
+                <td class="px-6 py-4 text-sm font-medium text-slate-900"><%= prescription.customer.name %></td>
+                <td class="px-6 py-4 text-sm text-slate-700"><%= prescription.medicine_name %></td>
+                <td class="px-6 py-4 text-sm text-slate-700"><%= prescription.next_delivery_date.strftime("%b %d, %Y") %></td>
+                <td class="px-6 py-4 text-sm">
+                  <% days_until_delivery = (prescription.next_delivery_date - Date.current).to_i %>
+                  <% status_classes =
+                    if days_until_delivery.negative?
+                      "bg-red-100 text-red-700"
+                    elsif days_until_delivery.zero?
+                      "bg-amber-100 text-amber-800"
+                    else
+                      "bg-emerald-100 text-emerald-700"
+                    end %>
+
+                  <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold <%= status_classes %>">
+                    <%= delivery_proximity_label(prescription.next_delivery_date) %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="px-6 py-10 text-center">
+        <p class="text-sm text-slate-500"><%= @query.present? ? "No prescriptions matched your search." : "No prescriptions have been added yet." %></p>
+      </div>
+    <% end %>
+  </section>
+</div>

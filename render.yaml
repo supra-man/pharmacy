@@ -1,11 +1,8 @@
 services:
   - type: web
     name: pharmacy-app
-    runtime: ruby
+    runtime: docker
     plan: starter
-    buildCommand: "./bin/render-build.sh"
-    startCommand: "bundle exec puma -C config/puma.rb"
-    preDeployCommand: "bundle exec rails db:migrate"
     healthCheckPath: /up
     envVars:
       - key: DATABASE_URL
@@ -14,8 +11,6 @@ services:
           property: connectionString
       - key: RAILS_MASTER_KEY
         sync: false
-      - key: RAILS_SERVE_STATIC_FILES
-        value: "true"
       - key: WEB_CONCURRENCY
         value: "1"
       - key: RAILS_MAX_THREADS

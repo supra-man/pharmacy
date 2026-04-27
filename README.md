@@ -17,18 +17,19 @@ Default seeded admin:
 
 ## Render deployment
 
-This app is configured to deploy on Render as a Ruby web service with PostgreSQL.
+This app is configured to deploy on Render as a Docker web service with PostgreSQL.
 
-Files added for Render:
+Files used for Render:
 
 - `render.yaml`
-- `Procfile`
-- `bin/render-build.sh`
+- `Dockerfile`
+- `bin/docker-entrypoint`
 
 Production is configured to use:
 
 - a single Render PostgreSQL database via `DATABASE_URL`
-- `puma` as the web server
+- Docker runtime on Render
+- `puma` as the container web server
 - `memory_store` cache
 - `async` Active Job and Action Cable adapters
 - Render `starter` web service and `basic-256mb` PostgreSQL plans in the included blueprint
@@ -44,9 +45,9 @@ Production is configured to use:
 Render will automatically:
 
 - create the PostgreSQL database
-- install gems and precompile assets
-- run `bundle exec rails db:migrate`
-- boot the app with Puma
+- build the Docker image from `Dockerfile`
+- boot the container with Puma
+- run `db:prepare` from the Docker entrypoint on startup
 
 ### Required environment variables
 

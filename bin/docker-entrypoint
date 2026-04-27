@@ -6,9 +6,11 @@ if [ -z "${LD_PRELOAD+x}" ]; then
     export LD_PRELOAD
 fi
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# If starting the web server, prepare the database first.
+case "$*" in
+  *"./bin/rails server"*|*"bundle exec puma -C config/puma.rb"*)
   ./bin/rails db:prepare
-fi
+  ;;
+esac
 
 exec "${@}"

@@ -1,24 +1,56 @@
-# README
+# Pharmacy Reminder System
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Internal Rails app for tracking customers, prescriptions, and upcoming delivery dates for a pharmacy shop.
 
-Things you may want to cover:
+## Local setup
 
-* Ruby version
+```bash
+bundle install
+bin/rails db:create db:migrate db:seed
+bin/dev
+```
 
-* System dependencies
+Default seeded admin:
 
-* Configuration
+- Email: `admin@pharmacy.local`
+- Password: `ChangeMe123!`
 
-* Database creation
+## Render deployment
 
-* Database initialization
+This app is configured to deploy on Render as a Ruby web service with PostgreSQL.
 
-* How to run the test suite
+Files added for Render:
 
-* Services (job queues, cache servers, search engines, etc.)
+- `render.yaml`
+- `Procfile`
+- `bin/render-build.sh`
 
-* Deployment instructions
+Production is configured to use:
 
-* ...
+- a single Render PostgreSQL database via `DATABASE_URL`
+- `puma` as the web server
+- `memory_store` cache
+- `async` Active Job and Action Cable adapters
+- Render `starter` web service and `basic-256mb` PostgreSQL plans in the included blueprint
+
+### Deploy with Render Blueprint
+
+1. Push the app to GitHub.
+2. In Render, choose `New +` then `Blueprint`.
+3. Select the repository.
+4. Add the `RAILS_MASTER_KEY` environment variable in Render.
+5. Deploy the blueprint.
+
+Render will automatically:
+
+- create the PostgreSQL database
+- install gems and precompile assets
+- run `bundle exec rails db:migrate`
+- boot the app with Puma
+
+### Required environment variables
+
+- `RAILS_MASTER_KEY`
+- `DATABASE_URL`
+
+`DATABASE_URL` is populated automatically by Render when deploying from `render.yaml`.
